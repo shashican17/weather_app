@@ -12,13 +12,60 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final WeatherFactory _wf = WeatherFactory(OPENWEATHER_API_KEY);
-
   Weather? _weather;
+  String _selectedCity = "Amsterdam";
+
+  final List<String> _cities = [
+    "Amsterdam",
+    "Athens",
+    "Bangkok",
+    "Barcelona",
+    "Beijing",
+    "Berlin",
+    "Boston",
+    "Buenos Aires",
+    "Cairo",
+    "Chicago",
+    "Delhi",
+    "Dubai",
+    "Hong Kong",
+    "Istanbul",
+    "Jakarta",
+    "Johannesburg",
+    "Kuala Lumpur",
+    "Las Vegas",
+    "London",
+    "Los Angeles",
+    "Madrid",
+    "Mexico City",
+    "Miami",
+    "Moscow",
+    "Mumbai",
+    "New York",
+    "Osaka",
+    "Paris",
+    "Rio de Janeiro",
+    "Rome",
+    "San Francisco",
+    "Seoul",
+    "Shanghai",
+    "Singapore",
+    "Sydney",
+    "Tokyo",
+    "Toronto",
+    "Vancouver",
+    "Vienna",
+    "Zurich"
+  ]..sort();
 
   @override
   void initState() {
     super.initState();
-    _wf.currentWeatherByCityName("Delhi").then((w) {
+    _fetchWeather(_selectedCity);
+  }
+
+  void _fetchWeather(String city) {
+    _wf.currentWeatherByCityName(city).then((w) {
       setState(() {
         _weather = w;
       });
@@ -28,52 +75,126 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildUI(),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple, Colors.indigo],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: _buildUI(),
+      ),
     );
   }
 
   Widget _buildUI() {
     if (_weather == null) {
       return const Center(
-        child: CircularProgressIndicator(),
-      );
+          child: CircularProgressIndicator(color: Colors.white));
     }
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      height: MediaQuery.sizeOf(context).height,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _locationHeader(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.08,
-          ),
-          _dateTimeInfo(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.05,
-          ),
-          _weatherIcon(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.02,
-          ),
-          _currentTemp(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.02,
-          ),
-          _extraInfo(),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _locationHeader(),
+        const SizedBox(height: 30),
+        _dateTimeInfo(),
+        const SizedBox(height: 25),
+        _weatherIcon(),
+        const SizedBox(height: 15),
+        _currentTemp(),
+        const SizedBox(height: 20),
+        _extraInfo(),
+      ],
     );
   }
 
   Widget _locationHeader() {
-    return Text(
-      _weather?.areaName ?? "",
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () => _showCitySelectionDialog(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black26,
+                blurRadius: 6,
+                offset: const Offset(0, 2))
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _selectedCity,
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCitySelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2D64),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          "Select a City",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: Scrollbar(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _cities.length,
+              itemBuilder: (context, index) {
+                bool isSelected = _cities[index] == _selectedCity;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.deepPurpleAccent
+                        : const Color(0xFF464A9B),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: ListTile(
+                    title: Text(
+                      _cities[index],
+                      style: TextStyle(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: Colors.white,
+                      ),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _selectedCity = _cities[index];
+                        _fetchWeather(_selectedCity);
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -85,30 +206,12 @@ class _HomePageState extends State<HomePage> {
         Text(
           DateFormat("h:mm a").format(now),
           style: const TextStyle(
-            fontSize: 35,
-          ),
+              fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              DateFormat("EEEE").format(now),
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              "  ${DateFormat("d.m.y").format(now)}",
-              style: const TextStyle(
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
+        const SizedBox(height: 5),
+        Text(
+          "${DateFormat("EEEE").format(now)}, ${DateFormat("d MMM y").format(now)}",
+          style: const TextStyle(fontSize: 18, color: Colors.white70),
         ),
       ],
     );
@@ -116,12 +219,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _weatherIcon() {
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          height: MediaQuery.sizeOf(context).height * 0.20,
+          height: 150,
           decoration: BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(
@@ -130,11 +230,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         Text(
-          _weather?.weatherDescription ?? "",
+          _weather?.weatherDescription?.toUpperCase() ?? "",
           style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-          ),
+              color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -144,74 +242,60 @@ class _HomePageState extends State<HomePage> {
     return Text(
       "${_weather?.temperature?.celsius?.toStringAsFixed(0)}° C",
       style: const TextStyle(
-        color: Colors.black,
-        fontSize: 90,
-        fontWeight: FontWeight.w500,
-      ),
+          color: Colors.white, fontSize: 90, fontWeight: FontWeight.bold),
     );
   }
 
   Widget _extraInfo() {
     return Container(
-      height: MediaQuery.sizeOf(context).height * 0.15,
-      width: MediaQuery.sizeOf(context).width * 0.80,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.deepPurpleAccent,
-        borderRadius: BorderRadius.circular(
-          20,
-        ),
-      ),
-      padding: const EdgeInsets.all(
-        8.0,
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white30, width: 1.5),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
-            mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Max: ${_weather?.tempMax?.celsius?.toStringAsFixed(0)}° C",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              ),
-              Text(
-                "Min: ${_weather?.tempMin?.celsius?.toStringAsFixed(0)}° C",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              )
+              _infoItem("Max",
+                  "${_weather?.tempMax?.celsius?.toStringAsFixed(0)}° C"),
+              _infoItem("Min",
+                  "${_weather?.tempMin?.celsius?.toStringAsFixed(0)}° C"),
             ],
           ),
+          const SizedBox(height: 10),
           Row(
-            mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Wind: ${_weather?.windSpeed?.toStringAsFixed(0)}m/s",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              ),
-              Text(
-                "Humidity: ${_weather?.humidity?.toStringAsFixed(0)}%",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              )
+              _infoItem(
+                  "Wind", "${_weather?.windSpeed?.toStringAsFixed(0)} m/s"),
+              _infoItem(
+                  "Humidity", "${_weather?.humidity?.toStringAsFixed(0)}%"),
             ],
-          )
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _infoItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+              color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          value,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }
