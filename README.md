@@ -23,7 +23,7 @@ A sleek and responsive **Flutter** weather application that fetches real-time we
 ## 🔧 Installation  
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/yourusername/weather_app.git
+   git clone https://github.com/shashican17/weather_app.git
    cd weather_app
    ```  
 2. **Install dependencies**  
@@ -41,11 +41,3 @@ To use the OpenWeather API, create a file named `consts.dart` in the `lib/` fold
 const String OPENWEATHER_API_KEY = "your_api_key_here";
 ```  
 Replace `"your_api_key_here"` with your actual API key from [OpenWeather](https://openweathermap.org/api).  
-
-## 📌 Upcoming Features  
-- 🌍 **User-typed City Search** instead of a fixed list  
-- 🎨 **Custom themes (Light/Dark mode)**  
-- 📊 **Hourly & Weekly Forecasts**  
-
-## 🤝 Contributing  
-Feel free to submit a pull request or suggest improvements! 🚀  
